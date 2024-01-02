@@ -10,147 +10,131 @@
 
 class Scanner {
     private:
+        std::string source;
 
         int current = 0;
         int start = 0;
 
-        std::string text;
-
         std::vector<Token> tokens;
-
-        char c = text[current];
 
         std::map<std::string, TokenType> keywords;
 
-        char advance() {
-            return text[current++];
-        }
-
-        bool isAtEnd() {
-            return current >= text.length();
-        }
-
         void addToken(TokenType type) {
             tokens.push_back(Token(type, 0, ""));
+            current++;
         }
 
-        void addToken(TokenType type, double literal) {
-            tokens.push_back(Token(type, literal, ""));
+        void addToken(TokenType type, double val) {
+            tokens.push_back(Token(type, val, ""));
         }
 
         void addToken(TokenType type, std::string identifier) {
             tokens.push_back(Token(type, 0, identifier));
         }
 
-        char peek() {
-            return text[current];
+        bool isAlpha(char c) {
+            return (c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            c == '_';
         }
 
-        bool match(char exp) {
-            if (check(exp)) {
-                advance();
-                return true;
-            }
-            return false;
-        }
-
-        bool check(char exp) {
-            if (isAtEnd()) return false;
-            if (peek() == exp) {
-                return true;
-            }
-            return false;
-        }
-
-        bool isDigit(char chr) {
-            return chr >= '0' && chr <= '9';
-        }
-
-        bool isAlpha(char chr) {
-            return (chr >= 'A' && chr <= 'Z') ||
-                   (chr >= 'a' && chr <= 'z') ||
-                    chr == '_'; 
-        }
-
-        void number() {
-            start = current - 1;
-            while (isDigit(peek())) advance();
-            if (c == '.') {
-                while (isDigit(peek())) advance();
-            }
-            addToken(TokenType::LITERAL, std::stod(text.substr(start, current - start)));
-        }
-
-        void identifier() {
-            start = current - 1;
-            while (isAlpha(peek())) advance();
-
-            std::string idtfr = text.substr(start, current - start);
-
-            auto pos = keywords.find(idtfr);
-            if (pos == keywords.end()) {
-                addToken(TokenType::IDENTIFIER, idtfr);
-                advance();
-            } else {
-                addToken(pos->second, pos->first);
-                advance();
-            }
+        bool isDigit(char c) {
+            return c >= '0' && c <= '9';
         }
 
     public:
+        std::vector<Token> scanTokens() {
+            while (source[current] != '\0') {
+                char c = source[current];
 
-        std::vector<Token> scanText() {
-            while (!isAtEnd()) {
-                c = advance();
-                switch(c) {
-                    case '(': addToken(TokenType::LEFT_PAREN); break;
-                    case ')': addToken(TokenType::RIGHT_PAREN); break;
-                    case '{': addToken(TokenType::LEFT_BRACE); break;
-                    case '}': addToken(TokenType::RIGHT_BRACE); break;                    
+                switch (c) {
                     case '+': addToken(TokenType::PLUS); break;
                     case '-': addToken(TokenType::MINUS); break;
                     case '*': addToken(TokenType::STAR); break;
                     case '%': addToken(TokenType::MOD); break;
+                    case '(': addToken(TokenType::LEFT_PAREN); break;
+                    case '{': addToken(TokenType::LEFT_BRACE); break;
+                    case '}': addToken(TokenType::RIGHT_BRACE); break;
+                    case ')': addToken(TokenType::RIGHT_PAREN); break;
+                    case ';': addToken(TokenType::SEMICOLON); break;
                     case '=':
-                        addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL); break;
-                    case '!':
-                        addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG); break;
-                    case '>':
-                        addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER); break;
-                    case '<':
-                        addToken(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS); break;
-                    case '/':
-                        if (match('/')) {
-                            while (peek() != '\n' && !isAtEnd()) advance();
-                            break;    
+                        if (source[current + 1] == '=') {
+                            addToken(TokenType::EQUAL_EQUAL);
+                            current++;
                         } else {
-                            addToken(TokenType::SLASH); break;
-                            break;
+                            addToken(TokenType::EQUAL);
+                        } break;
+                    case '!':
+                        if (source[current + 1] == '=') {
+                            addToken(TokenType::BANG_EQUAL);
+                            current++;
+                        } else {
+                            addToken(TokenType::BANG);
+                        } break;
+                    case '>':
+                        if (source[current + 1] == '=') {
+                            addToken(TokenType::GREATER_EQUAL);
+                            current++;
+                        } else {
+                            addToken(TokenType::GREATER);
+                        } break;
+                    case '<':
+                        if (source[current + 1] == '=') {
+                            addToken(TokenType::LESS_EQUAL);
+                            current++;
+                        } else {
+                            addToken(TokenType::LESS);
+                        } break;
+                    case '/':
+                        if (source[current + 1] == '/') {
+                            while (source[current] != '\n' && source[current] != '\0') {
+                                current++;
+                            }
+                            current++;
+                        } else {
+                            addToken(TokenType::SLASH);
                         }
                         break;
                     default:
                         if (isDigit(c)) {
-                            number();
-                        } else if (isAlpha(c)) {
-                            identifier();
-                        }
-                        else {
-                            advance();
+                            start = current;
+                            while (isDigit(source[++current]));
+                            if (source[current] == '.' && isDigit(source[current + 1])) {
+                                current++;
+                                while (isDigit(source[++current])); 
+                            }
+                            addToken(TokenType::LITERAL, std::stod(source.substr(start, current - start)));
+                        } else if (isAlpha(source[current])) {
+                            start = current;
+                            while (isAlpha(source[++current]));
+                            std::string txt = source.substr(start, current - start);
+                            auto pos = keywords.find(txt);
+                            if (pos == keywords.end()) {
+                                addToken(TokenType::IDENTIFIER, txt);
+                            } else {
+                                addToken(pos->second);
+                                current--;
+                            }
+                        } else {
+                            current++;
                         }
                         break;
                 }
             }
 
+            tokens.push_back(Token(TokenType::END_OF_FILE, 0, ""));
             return tokens;
         }
 
-        Scanner(std::string txt) : text(txt) {
+        Scanner(std::string text) : source(text) {
             keywords["for"] = TokenType::FOR;
             keywords["while"] = TokenType::WHILE;
             keywords["if"] = TokenType::IF;
             keywords["and"] = TokenType::AND;
-            keywords["false"] = TokenType::FALSE;
-            keywords["true"] = TokenType::TRUE;
+            keywords["or"] = TokenType::OR;
             keywords["print"] = TokenType::PRINT;
-        }
+            keywords["num"] = TokenType::NUM;
+            keywords["true"] = TokenType::TRUE;
+            keywords["false"] = TokenType::FALSE;
+        };
 };

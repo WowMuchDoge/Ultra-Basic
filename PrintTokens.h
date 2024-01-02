@@ -88,18 +88,17 @@ class PrintTokens {
                     case TokenType::RIGHT_PAREN:
                         std::cout << ") " << "right paren" << '\n';
                         break;
-                    case TokenType::FALSE:
-                        std::cout << "false " << '\n';
-                        break;
-                    case TokenType::TRUE:
-                        std::cout << "true " << '\n';
-                        break;
                     case TokenType::END_OF_FILE:
                         std::cout << "eof " << '\n';
                         break;
                     case TokenType::PRINT:
                         std::cout << "print " << '\n';
                         break;
+                    case TokenType::OR:
+                        std::cout << "or\n";
+                        break;
+                    case TokenType::NUM:
+                        std::cout << "num\n";
                 }
             }
         }
