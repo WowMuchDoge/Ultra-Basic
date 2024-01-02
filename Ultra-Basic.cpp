@@ -7,7 +7,7 @@
 #include "Stmt.h"
 
 int main() {
-    Scanner scanner("num a = (1 - 10); print(1);");
+    Scanner scanner("num a = 30 * 3; print(a);");
 
     std::vector<Token> tokens = scanner.scanTokens();
 

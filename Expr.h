@@ -5,6 +5,8 @@
 #include <string>
 
 #include "Token.h"
+#include "TokenType.h"
+#include "Environment.h"
 
 class Expr {
     public:
@@ -99,5 +101,21 @@ class Literal : public Expr {
 
         double eval() override {
             return value;
+        }
+};
+
+class VariableExpr : public Expr {
+    public:
+        Token token;
+        Environment *env;
+
+        VariableExpr(Token tkn, Environment *e) : token(tkn), env(e) {}
+
+        std::string printExpr() {
+            return "Variable Expression";
+        }
+
+        double eval() override {
+            return env->get(token.lexeme);
         }
 };

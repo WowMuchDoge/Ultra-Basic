@@ -155,6 +155,11 @@ class Parser {
                     return nullptr;
                 }
             }
+
+            if (match(TokenType::IDENTIFIER)) {
+                return new VariableExpr(previous(), &env);
+            }
+
             return nullptr;
         }
 

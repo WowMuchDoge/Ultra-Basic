@@ -19,7 +19,7 @@ class PrintStmt : public Stmt {
         PrintStmt(Expr *exp) : expr(exp) {}
 
         void execute() {
-            std::cout << expr->eval();
+            std::cout << expr->eval() << '\n';
         }
 };
 
