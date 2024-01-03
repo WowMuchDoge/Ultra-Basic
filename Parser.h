@@ -157,7 +157,7 @@ class Parser {
         Expr *factor() {
             Expr *expr = unary();
 
-            while (match(TokenType::STAR, TokenType::SLASH)) {
+            while (match(TokenType::STAR, TokenType::SLASH, TokenType::MOD)) {
                 Token oprtr = previous();
                 Expr *right = unary();
                 expr = new Binary(expr, oprtr, right);

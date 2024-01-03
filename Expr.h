@@ -37,6 +37,8 @@ class Binary : public Expr {
                     return left->eval() * right->eval();
                 case TokenType::SLASH:
                     return left->eval() / right->eval();
+                case TokenType::MOD:
+                    return (int)left->eval() % (int)right->eval();
                 case TokenType::EQUAL_EQUAL:
                     return (double) (left->eval() == right->eval());
                 case TokenType::BANG_EQUAL:

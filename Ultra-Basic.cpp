@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+
 #include "Token.h"
 #include "TokenType.h"
 #include "Scanner.h"
@@ -7,15 +9,27 @@
 #include "Stmt.h"
 
 int main() {
-    Scanner scanner("num a = 0; if (a < 10) {print(a);} while (a < 10) {print(a); num a = a + 1;}");
+    std::string fileText;
+
+    std::ifstream txtFile("code.txt");
+
+    std::string line;
+    while (std::getline(txtFile, line)) {
+        fileText += line;
+        fileText += '\n';
+    }
+
+    std::cout << fileText;
+
+    Scanner scanner(fileText);
 
     std::vector<Token> tokens = scanner.scanTokens();
 
     PrintTokens pTokens(tokens);
 
-    pTokens.printEm();
-
     Parser parser(tokens);
+
+    pTokens.printEm();
 
     std::vector<Stmt*> statements;
     statements = parser.parse();

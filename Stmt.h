@@ -67,7 +67,7 @@ class WhileStatement : public Stmt {
         Expr *expr;
         Stmt *stmt;
 
-        WhileStatement(Expr *exp, Stmt *stm) : expr(exp) {}
+        WhileStatement(Expr *exp, Stmt *stm) : expr(exp), stmt(stm) {}
 
         void execute() override {
             while (expr->eval() >= 1) {
