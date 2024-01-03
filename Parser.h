@@ -16,6 +16,9 @@ class Parser {
 
         Stmt *statement() {
             if (match(TokenType::PRINT)) return printStatement();
+            if (match(TokenType::LEFT_BRACE)) return new Block(block());
+            if (match(TokenType::WHILE)) return whileStatement();
+            if (match(TokenType::IF)) return ifStatement();
 
             return expressionStatement();
         }
@@ -43,13 +46,48 @@ class Parser {
             Expr *expr = expression();
 
             match(TokenType::SEMICOLON);
-            return new VariableStmt(expr->eval(), token, &env);
+            return new VariableStmt(expr, token, &env);
         }
 
         Stmt *expressionStatement() {
             Expr *expr = expression();
             match(TokenType::SEMICOLON);
             return nullptr;
+        }
+
+        std::vector<Stmt*> block() {
+            std::vector<Stmt*> blockStatements;
+
+            while (!check(TokenType::RIGHT_BRACE)) {
+                blockStatements.push_back(declaration());
+            }
+
+            match(TokenType::RIGHT_BRACE);
+            return blockStatements;
+        }
+
+        Stmt *whileStatement() {
+            match(TokenType::LEFT_PAREN);
+            Expr *expr = expression();
+            match(TokenType::RIGHT_PAREN);
+
+
+            Stmt *body = declaration();
+            std::cout << peek().type << " This is the while statement" << '\n';
+
+
+            return new WhileStatement(expr, body);
+        }
+
+        Stmt *ifStatement() {
+            match(TokenType::LEFT_PAREN);
+            Expr *expr = expression();
+            match(TokenType::RIGHT_PAREN);
+
+            Stmt *body = declaration();
+            std::cout << peek().type << " This is the if statement" << '\n';
+
+            return new IfStatement(expr, body);
         }
 
         Expr *expression() {
@@ -233,11 +271,7 @@ class Parser {
         }
 
         bool isAtEnd() {
-            if (peek().type == TokenType::END_OF_FILE) {
-                return true;
-            } else {
-                return false;
-            }
+            return peek().type == TokenType::END_OF_FILE;
         }
 
     public:
